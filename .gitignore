@@ -1,0 +1,22 @@
+# Node
+node_modules/
+
+# Env
+.env
+.env.*.local
+!.env.example
+
+# Build outputs
+backend/dist/
+frontend/build/
+frontend/.svelte-kit/
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

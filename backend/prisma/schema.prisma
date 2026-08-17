@@ -1,0 +1,215 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Auth
+// ---------------------------------------------------------------------------
+
+model Admin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("admins")
+}
+
+// ---------------------------------------------------------------------------
+// Treks
+// ---------------------------------------------------------------------------
+
+enum TrekCategory {
+  SIGNATURE
+  PEAK_CLIMBING
+  SHORT_TREKS
+
+  @@map("trek_category")
+}
+
+enum TrekDifficulty {
+  MODERATE
+  CHALLENGING
+  STRENUOUS
+
+  @@map("trek_difficulty")
+}
+
+model Trek {
+  id           String         @id @default(cuid())
+  slug         String         @unique
+  category     TrekCategory
+  name         String
+  region       String
+  tagline      String
+  summary      String
+  overview     String
+  days         Int
+  maxAltitude  String
+  difficulty   TrekDifficulty
+  bestSeasons  String
+  groupSize    String
+  startEnd     String
+  price        Int
+  priceNote    String
+  image        String
+  imageAlt     String
+  highlights   String[]
+  includes     String[]
+  excludes     String[]
+  order        Int            @default(0)
+
+  gallery    TrekGalleryImage[]
+  departures TrekDeparture[]
+  itinerary  ItineraryDay[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("treks")
+}
+
+model TrekGalleryImage {
+  id      String @id @default(cuid())
+  trek    Trek   @relation(fields: [trekId], references: [id], onDelete: Cascade)
+  trekId  String
+  image   String
+  alt     String
+  order   Int    @default(0)
+
+  @@index([trekId])
+  @@map("trek_gallery_images")
+}
+
+model TrekDeparture {
+  id        String   @id @default(cuid())
+  trek      Trek     @relation(fields: [trekId], references: [id], onDelete: Cascade)
+  trekId    String
+  date      DateTime @db.Date
+  spotsLeft Int
+
+  @@index([trekId])
+  @@map("trek_departures")
+}
+
+model ItineraryDay {
+  id          String @id @default(cuid())
+  trek        Trek   @relation(fields: [trekId], references: [id], onDelete: Cascade)
+  trekId      String
+  day         Int
+  title       String
+  location    String
+  elevation   String
+  description String
+
+  @@unique([trekId, day])
+  @@map("itinerary_days")
+}
+
+// ---------------------------------------------------------------------------
+// Journal
+// ---------------------------------------------------------------------------
+
+model Article {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  title        String
+  excerpt      String
+  category     String
+  readMinutes  Int
+  publishDate  DateTime @db.Date
+  image        String
+  imageAlt     String
+  /// ArticleSection[] — { heading: string; body: string[] }[]
+  sections     Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("articles")
+}
+
+// ---------------------------------------------------------------------------
+// Testimonials / FAQ / Stats
+// ---------------------------------------------------------------------------
+
+model Testimonial {
+  id       String @id @default(cuid())
+  quote    String
+  name     String
+  location String
+  trek     String
+  image    String
+  imageAlt String
+  order    Int    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("testimonials")
+}
+
+model FaqItem {
+  id       String @id @default(cuid())
+  question String
+  answer   String
+  order    Int    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("faq_items")
+}
+
+model Stat {
+  id     String  @id @default(cuid())
+  value  Float
+  prefix String?
+  suffix String?
+  label  String
+  order  Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("stats")
+}
+
+// ---------------------------------------------------------------------------
+// Site content — singleton row of editable copy/section content for the
+// marketing pages (nav, footer, hero, about, contact, ...). Each field is a
+// self-contained JSON blob matching the frontend's SiteContent section
+// types (src/lib/cms/schema.ts), so the admin UI can PATCH one section at a
+// time without needing a migration for every copy change.
+// ---------------------------------------------------------------------------
+
+model SiteSettings {
+  id                   Int      @id @default(1)
+  seo                  Json
+  nav                  Json
+  footer               Json
+  hero                 Json
+  statsSection         Json
+  whyGrid              Json
+  regions              Json
+  activities           Json
+  trailStory           Json
+  ebcTiers             Json
+  planYourTrek         Json
+  about                Json
+  contact              Json
+  treksPage            Json
+  journalPage          Json
+  trekDetailLabels     Json
+  journalDetailLabels  Json
+  updatedAt            DateTime @updatedAt
+
+  @@map("site_settings")
+}

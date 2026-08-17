@@ -1,0 +1,170 @@
+@import 'tailwindcss';
+
+/* Playfair Display — chapter titles, hero line. Weights per spec: 600/700/900 */
+@import '@fontsource/playfair-display/600.css';
+@import '@fontsource/playfair-display/700.css';
+@import '@fontsource/playfair-display/900.css';
+@import '@fontsource/playfair-display/600-italic.css';
+
+/* Inter — body/UI. Weights per spec: 400/500/600 */
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+
+@theme {
+	/* Palette: Nepal-inspired, not generic travel-blue.
+	   "snow" is always the page ground, "ink" is always the page ink — but
+	   which literal color each one resolves to flips with the active theme
+	   (see the [data-theme] and prefers-color-scheme blocks below).
+
+	   "scrim" / "on-scrim" are the one pair that never flips: photo sections
+	   (hero, parallax story, testimonial slides, page banners) always scrim
+	   dark and set light text directly, in either page theme — that's a
+	   photography convention, not a page-theme exception. */
+	--color-ink: #0b0f14;
+	--color-snow: #f7f5f0;
+	--color-surface: #ffffff;
+	--color-scrim: #0b0f14;
+	--color-on-scrim: #f7f5f0;
+	--color-crimson: #c8102e;
+	--color-crimson-dim: #9c0c24;
+	--color-gold: #9a631a;
+	--color-gold-bright: #e3a857;
+	--color-teal: #2e8b9e;
+	--color-muted: #6e6a63;
+
+	--font-display: 'Playfair Display', 'Georgia', serif;
+	--font-sans: 'Inter', 'Helvetica Neue', sans-serif;
+
+	--ease-out-cinematic: cubic-bezier(0.16, 1, 0.3, 1);
+
+	--breakpoint-xs: 23.4375rem; /* 375px */
+}
+
+@layer base {
+	* {
+		box-sizing: border-box;
+	}
+
+	:root {
+		color-scheme: light;
+	}
+
+	/* Dark theme: either explicitly chosen, or "system" and the OS prefers dark.
+	   The .theme-toggle.svelte script sets data-theme="light" | "dark" on <html>
+	   for an explicit choice, and removes the attribute entirely for "system". */
+	[data-theme='dark'] {
+		--color-ink: #f7f5f0;
+		--color-snow: #0b0f14;
+		--color-surface: #10161d;
+		--color-gold: #e3a857;
+		--color-muted: #9aa5b1;
+		color-scheme: dark;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root:not([data-theme='light']):not([data-theme='dark']) {
+			--color-ink: #f7f5f0;
+			--color-snow: #0b0f14;
+			--color-surface: #10161d;
+			--color-gold: #e3a857;
+			--color-muted: #9aa5b1;
+			color-scheme: dark;
+		}
+	}
+
+	html {
+		background: var(--color-snow);
+		scroll-behavior: smooth;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		html {
+			scroll-behavior: auto;
+		}
+	}
+
+	body {
+		background: var(--color-snow);
+		color: var(--color-ink);
+		font-family: var(--font-sans);
+		font-weight: 400;
+		-webkit-font-smoothing: antialiased;
+		overflow-x: hidden;
+		transition: background-color 200ms ease, color 200ms ease;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4 {
+		font-family: var(--font-display);
+		letter-spacing: -0.01em;
+		line-height: 1.1;
+	}
+
+	::selection {
+		background: var(--color-crimson);
+		color: var(--color-on-scrim);
+	}
+
+	a,
+	button {
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	:focus-visible {
+		outline: 2px solid var(--color-gold);
+		outline-offset: 3px;
+		border-radius: 2px;
+	}
+
+	/* Thin rule lines — the only place saturated color earns real estate */
+	.rule-gold {
+		background: linear-gradient(90deg, var(--color-gold), transparent);
+	}
+
+	/* A touch of warmth on every photo: firelight rather than a flat scan. */
+	img {
+		filter: saturate(1.08) contrast(1.02) sepia(0.045);
+	}
+
+	/* Soft, warm-tinted elevation for cards — never a harsh black drop shadow. */
+	.shadow-cozy {
+		box-shadow:
+			0 1px 2px rgba(20, 12, 4, 0.18),
+			0 12px 32px -12px rgba(20, 12, 4, 0.45);
+	}
+	.shadow-cozy-hover {
+		transition: box-shadow 300ms var(--ease-out-cinematic), transform 300ms var(--ease-out-cinematic);
+	}
+	.shadow-cozy-hover:hover {
+		box-shadow:
+			0 2px 4px rgba(20, 12, 4, 0.22),
+			0 20px 48px -16px rgba(227, 168, 87, 0.22);
+		transform: translateY(-2px);
+	}
+
+	::-webkit-scrollbar {
+		width: 10px;
+	}
+	::-webkit-scrollbar-track {
+		background: var(--color-snow);
+	}
+	::-webkit-scrollbar-thumb {
+		background: var(--color-muted);
+		border-radius: 999px;
+	}
+
+	/* Universal kill-switch for CSS-driven motion (Tailwind's animate-bounce, etc).
+	   GSAP timelines are separately gated per-component via prefersReducedMotion(). */
+	@media (prefers-reduced-motion: reduce) {
+		*,
+		*::before,
+		*::after {
+			animation-duration: 0.01ms !important;
+			animation-iteration-count: 1 !important;
+			transition-duration: 0.01ms !important;
+		}
+	}
+}
