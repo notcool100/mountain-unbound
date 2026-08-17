@@ -135,9 +135,12 @@ export type TrekDetailLabels = {
 
 export type JournalDetailLabels = { moreHeading: string };
 
+export type BrandingContent = { logoUrl: string; faviconUrl: string };
+
 export type SiteContent = {
 	seo: SeoContent;
 	nav: NavContent;
+	branding: BrandingContent;
 	footer: FooterContent;
 	hero: HeroContent;
 	statsSection: StatsSectionContent;

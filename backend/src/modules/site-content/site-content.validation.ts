@@ -17,7 +17,8 @@ export const siteSectionKeys = [
 	'treksPage',
 	'journalPage',
 	'trekDetailLabels',
-	'journalDetailLabels'
+	'journalDetailLabels',
+	'branding'
 ] as const;
 
 export type SiteSectionKey = (typeof siteSectionKeys)[number];

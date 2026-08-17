@@ -4,3 +4,10 @@ dist
 .env.*.local
 *.log
 .DS_Store
+uploads/*
+!uploads/images
+!uploads/videos
+uploads/images/*
+uploads/videos/*
+!uploads/images/.gitkeep
+!uploads/videos/.gitkeep

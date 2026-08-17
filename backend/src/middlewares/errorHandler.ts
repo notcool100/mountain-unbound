@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import { Prisma } from '@prisma/client';
+import { MulterError } from 'multer';
 import { ZodError } from 'zod';
 import { ApiError } from '../utils/ApiError.js';
 import { logger } from '../lib/logger.js';
@@ -11,6 +12,12 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
 			message: err.message,
 			details: err.details
 		});
+	}
+
+	if (err instanceof MulterError) {
+		const message =
+			err.code === 'LIMIT_FILE_SIZE' ? 'File is too large' : (err.message ?? 'Upload failed');
+		return res.status(400).json({ success: false, message });
 	}
 
 	if (err instanceof ZodError) {

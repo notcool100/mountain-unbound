@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { revealStagger, reveal } from '$lib/utils/reveal';
 	import { content } from '$lib/cms/store.svelte';
+	import { resolveImageSrcset } from '$lib/cms/media';
 
 	let regions = $derived(content.regions.regions);
 </script>
@@ -31,13 +32,15 @@
 						class="group shadow-cozy shadow-cozy-hover relative aspect-[3/4] overflow-hidden rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
 					>
 						<picture>
-							<source
-								srcset={`${region.image}-960.webp 960w, ${region.image}-1920.webp 1920w`}
-								type="image/webp"
-								sizes="(min-width: 640px) 33vw, 100vw"
-							/>
+							{#if resolveImageSrcset(region.image).srcset}
+								<source
+									srcset={resolveImageSrcset(region.image).srcset}
+									type="image/webp"
+									sizes="(min-width: 640px) 33vw, 100vw"
+								/>
+							{/if}
 							<img
-								src={`${region.image}-1920.webp`}
+								src={resolveImageSrcset(region.image).src}
 								alt={region.imageAlt}
 								class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
 								loading="lazy"

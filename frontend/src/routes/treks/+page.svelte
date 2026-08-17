@@ -14,6 +14,7 @@
 	import type { TrekCategory, Trek } from '$lib/data/treks';
 	import { revealStagger, reveal } from '$lib/utils/reveal';
 	import { content } from '$lib/cms/store.svelte';
+	import { resolveImageSrcset } from '$lib/cms/media';
 
 	const categoryTabs: { key: TrekCategory | 'all'; label: string; icon: typeof Flame }[] = [
 		{ key: 'all', label: 'All Treks', icon: Compass },
@@ -159,13 +160,15 @@
 							>
 								<div class="relative aspect-[4/3] w-full overflow-hidden">
 									<picture>
-										<source
-											srcset={`${trek.image}-960.webp 960w, ${trek.image}-1920.webp 1920w`}
-											type="image/webp"
-											sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 100vw"
-										/>
+										{#if resolveImageSrcset(trek.image).srcset}
+											<source
+												srcset={resolveImageSrcset(trek.image).srcset}
+												type="image/webp"
+												sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 100vw"
+											/>
+										{/if}
 										<img
-											src={`${trek.image}-1920.webp`}
+											src={resolveImageSrcset(trek.image).src}
 											alt={trek.imageAlt}
 											class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
 											loading="lazy"

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { reveal } from '$lib/utils/reveal';
+	import { resolveImageSrcset } from '$lib/cms/media';
 
 	type Props = {
 		image: string;
@@ -10,13 +11,16 @@
 	};
 
 	let { image, imageAlt, eyebrow, title, subtitle }: Props = $props();
+	let banner = $derived(resolveImageSrcset(image));
 </script>
 
 <section class="relative flex h-[52vh] min-h-[380px] items-end overflow-hidden bg-scrim md:h-[58vh]">
 	<picture>
-		<source srcset={`${image}-960.webp 960w, ${image}-1920.webp 1920w`} type="image/webp" sizes="100vw" />
+		{#if banner.srcset}
+			<source srcset={banner.srcset} type="image/webp" sizes="100vw" />
+		{/if}
 		<img
-			src={`${image}-1920.webp`}
+			src={banner.src}
 			alt={imageAlt}
 			class="absolute inset-0 h-full w-full object-cover brightness-[0.65]"
 			loading="eager"

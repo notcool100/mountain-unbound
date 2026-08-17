@@ -6,10 +6,12 @@
 	import { scrollState } from '$lib/utils/scrollState.svelte';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 	import { content } from '$lib/cms/store.svelte';
+	import { resolveImageSrcset } from '$lib/cms/media';
 
 	let menuOpen = $state(false);
 
 	let links = $derived(content.nav.links);
+	let logoSrc = $derived(content.branding.logoUrl ? resolveImageSrcset(content.branding.logoUrl).src : '');
 
 	let isHome = $derived(page.url.pathname === '/');
 	// On the home page the nav starts transparent over the dark hero photo (light text),
@@ -48,11 +50,15 @@
 				? 'text-ink'
 				: 'text-on-scrim'}"
 		>
-			<MountainSnow
-				class="h-5 w-5 transition-colors {showSolid ? 'text-gold' : 'text-gold-bright'}"
-				strokeWidth={1.75}
-				aria-hidden="true"
-			/>
+			{#if logoSrc}
+				<img src={logoSrc} alt={content.nav.brand} class="h-7 w-auto object-contain" />
+			{:else}
+				<MountainSnow
+					class="h-5 w-5 transition-colors {showSolid ? 'text-gold' : 'text-gold-bright'}"
+					strokeWidth={1.75}
+					aria-hidden="true"
+				/>
+			{/if}
 			<span>{content.nav.brand}</span>
 			<span
 				class="hidden text-[0.6rem] font-sans font-medium tracking-[0.14em] transition-colors sm:inline {showSolid

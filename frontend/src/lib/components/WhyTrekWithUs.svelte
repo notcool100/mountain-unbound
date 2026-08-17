@@ -4,8 +4,10 @@
 	import { prefersReducedMotion } from '$lib/utils/motion.svelte';
 	import { reveal } from '$lib/utils/reveal';
 	import { content } from '$lib/cms/store.svelte';
+	import { resolveImageSrcset } from '$lib/cms/media';
 
 	let stats = $derived(content.statsSection.stats);
+	let backgroundSrc = $derived(resolveImageSrcset(content.statsSection.backgroundImage).src);
 	let statEls: HTMLElement[] = $state([]);
 	let headerEl: HTMLDivElement = $state()!;
 
@@ -44,7 +46,7 @@
 <section id="why-us" class="relative overflow-hidden bg-snow py-28 md:py-36">
 	<div
 		class="pointer-events-none absolute inset-0 opacity-[0.1]"
-		style="background: url('{content.statsSection.backgroundImage}-1920.webp') center 30% / cover no-repeat;"
+		style="background: url('{backgroundSrc}') center 30% / cover no-repeat;"
 		aria-hidden="true"
 	></div>
 	<div class="pointer-events-none absolute inset-0 bg-snow/90" aria-hidden="true"></div>

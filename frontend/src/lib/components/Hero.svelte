@@ -6,6 +6,7 @@
 	import { prefersReducedMotion } from '$lib/utils/motion.svelte';
 	import { scrollState } from '$lib/utils/scrollState.svelte';
 	import { content } from '$lib/cms/store.svelte';
+	import { resolveImageSrcset, resolveVideoUrl } from '$lib/cms/media';
 
 	let sectionEl: HTMLElement = $state()!;
 	let sentinelEl: HTMLDivElement = $state()!;
@@ -24,6 +25,8 @@
 
 	let headlineLine1 = $derived(content.hero.headlineLine1);
 	let headlineLine2 = $derived(content.hero.headlineLine2);
+	let heroPoster = $derived(resolveImageSrcset(content.hero.posterImage));
+	let heroVideoSrc = $derived(resolveVideoUrl(content.hero.videoSrc));
 
 	onMount(() => {
 		const reduced = prefersReducedMotion();
@@ -120,13 +123,11 @@
 	<!-- Background layer: static image is the real (LCP) element; video enhances on top -->
 	<div bind:this={bgEl} class="absolute inset-0 will-change-transform">
 		<picture>
-			<source
-				srcset={`${content.hero.posterImage}-960.webp 960w, ${content.hero.posterImage}-1920.webp 1920w`}
-				type="image/webp"
-				sizes="100vw"
-			/>
+			{#if heroPoster.srcset}
+				<source srcset={heroPoster.srcset} type="image/webp" sizes="100vw" />
+			{/if}
 			<img
-				src={`${content.hero.posterImage}-1920.jpg`}
+				src={heroPoster.src}
 				alt={content.hero.posterAlt}
 				class="h-full w-full object-cover"
 				fetchpriority="high"
@@ -140,14 +141,14 @@
 				class="absolute inset-0 h-full w-full object-cover transition-opacity duration-1000"
 				class:opacity-0={!videoReady}
 				class:opacity-100={videoReady}
-				poster={`${content.hero.posterImage}-1920.jpg`}
+				poster={heroPoster.src}
 				muted
 				loop
 				playsinline
 				preload="none"
 				aria-hidden="true"
 			>
-				<source src={content.hero.videoSrc} type="video/mp4" />
+				<source src={heroVideoSrc} type="video/mp4" />
 			</video>
 		{/if}
 	</div>

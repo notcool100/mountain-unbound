@@ -49,6 +49,7 @@ let hydrating = false;
 const SECTION_KEYS = [
 	'seo',
 	'nav',
+	'branding',
 	'footer',
 	'hero',
 	'whyGrid',

@@ -6,6 +6,7 @@
 	import PlanYourTrek from '$lib/components/PlanYourTrek.svelte';
 	import { reveal, revealStagger } from '$lib/utils/reveal';
 	import { content, cmsMeta } from '$lib/cms/store.svelte';
+	import { resolveImageSrcset } from '$lib/cms/media';
 
 	let trek = $derived(content.treks.find((t) => t.slug === page.params.slug));
 	let itinerary = $derived(trek ? (content.itineraries[trek.slug] ?? []) : []);
@@ -100,13 +101,15 @@
 				{#each trek.gallery as shot (shot.image)}
 					<div class="relative aspect-[16/10] overflow-hidden rounded-2xl">
 						<picture>
-							<source
-								srcset={`${shot.image}-960.webp 960w, ${shot.image}-1920.webp 1920w`}
-								type="image/webp"
-								sizes="(min-width: 640px) 50vw, 100vw"
-							/>
+							{#if resolveImageSrcset(shot.image).srcset}
+								<source
+									srcset={resolveImageSrcset(shot.image).srcset}
+									type="image/webp"
+									sizes="(min-width: 640px) 50vw, 100vw"
+								/>
+							{/if}
 							<img
-								src={`${shot.image}-1920.webp`}
+								src={resolveImageSrcset(shot.image).src}
 								alt={shot.alt}
 								class="h-full w-full object-cover"
 								loading="lazy"

@@ -7,11 +7,15 @@
 	import Nav from '$lib/components/Nav.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import { refreshOnSettle } from '$lib/utils/gsap';
-	import { initCms } from '$lib/cms/store.svelte';
+	import { content, initCms } from '$lib/cms/store.svelte';
+	import { resolveImageSrcset } from '$lib/cms/media';
 
 	let { children } = $props();
 
 	let isAdmin = $derived(page.url.pathname.startsWith('/admin'));
+	let faviconHref = $derived(
+		content.branding.faviconUrl ? resolveImageSrcset(content.branding.faviconUrl).src : favicon
+	);
 
 	function scheduleRefresh() {
 		// Double rAF: let this navigation's components finish mounting and
@@ -26,7 +30,7 @@
 	afterNavigate(scheduleRefresh);
 </script>
 
-<svelte:head><link rel="icon" href={favicon} /></svelte:head>
+<svelte:head><link rel="icon" href={faviconHref} /></svelte:head>
 
 {#if !isAdmin}<Nav />{/if}
 <main>

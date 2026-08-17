@@ -6,3 +6,4 @@ export * as journalApi from './journal';
 export * as testimonialsApi from './testimonials';
 export * as faqsApi from './faqs';
 export * as statsApi from './stats';
+export * as uploadsApi from './uploads';

@@ -3,12 +3,17 @@
 	import { ensureGsap, gsap, ScrollTrigger } from '$lib/utils/gsap';
 	import { prefersReducedMotion } from '$lib/utils/motion.svelte';
 	import { content } from '$lib/cms/store.svelte';
+	import { resolveImageSrcset } from '$lib/cms/media';
 
 	let sectionEl: HTMLElement = $state()!;
 	let backEl: HTMLDivElement = $state()!;
 	let midEl: HTMLDivElement = $state()!;
 	let foreEl: HTMLDivElement = $state()!;
 	let captionEl: HTMLDivElement = $state()!;
+
+	let backgroundImg = $derived(resolveImageSrcset(content.trailStory.backgroundImage));
+	let midImg = $derived(resolveImageSrcset(content.trailStory.midImage));
+	let foregroundImg = $derived(resolveImageSrcset(content.trailStory.foregroundImage));
 
 	onMount(() => {
 		if (prefersReducedMotion()) return;
@@ -78,13 +83,11 @@
 		<!-- Layer 1: distant peak silhouette, slowest. Desktop-only: mobile shows the foreground layer alone. -->
 		<div bind:this={backEl} class="absolute inset-x-0 -inset-y-[30%] will-change-transform hidden md:block">
 			<picture>
-				<source
-					srcset={`${content.trailStory.backgroundImage}-960.webp 960w, ${content.trailStory.backgroundImage}-1920.webp 1920w`}
-					type="image/webp"
-					sizes="100vw"
-				/>
+				{#if backgroundImg.srcset}
+					<source srcset={backgroundImg.srcset} type="image/webp" sizes="100vw" />
+				{/if}
 				<img
-					src={`${content.trailStory.backgroundImage}-1920.webp`}
+					src={backgroundImg.src}
 					alt={content.trailStory.backgroundAlt}
 					class="h-full w-full object-cover brightness-[0.55] saturate-[0.7]"
 					loading="lazy"
@@ -96,13 +99,11 @@
 		<!-- Layer 2: mid-ground ridgeline with trekkers, medium speed. Desktop-only, see note above. -->
 		<div bind:this={midEl} class="absolute inset-x-0 -inset-y-[30%] will-change-transform hidden md:block">
 			<picture>
-				<source
-					srcset={`${content.trailStory.midImage}-960.webp 960w, ${content.trailStory.midImage}-1920.webp 1920w`}
-					type="image/webp"
-					sizes="100vw"
-				/>
+				{#if midImg.srcset}
+					<source srcset={midImg.srcset} type="image/webp" sizes="100vw" />
+				{/if}
 				<img
-					src={`${content.trailStory.midImage}-1920.webp`}
+					src={midImg.src}
 					alt={content.trailStory.midAlt}
 					class="h-full w-full object-cover brightness-[0.72]"
 					loading="lazy"
@@ -114,13 +115,11 @@
 		<!-- Layer 3: foreground prayer flags, fastest -->
 		<div bind:this={foreEl} class="absolute inset-x-0 -inset-y-[30%] will-change-transform">
 			<picture>
-				<source
-					srcset={`${content.trailStory.foregroundImage}-960.webp 960w, ${content.trailStory.foregroundImage}-1920.webp 1920w`}
-					type="image/webp"
-					sizes="100vw"
-				/>
+				{#if foregroundImg.srcset}
+					<source srcset={foregroundImg.srcset} type="image/webp" sizes="100vw" />
+				{/if}
 				<img
-					src={`${content.trailStory.foregroundImage}-1920.webp`}
+					src={foregroundImg.src}
 					alt={content.trailStory.foregroundAlt}
 					class="h-full w-full object-cover object-bottom"
 					loading="lazy"

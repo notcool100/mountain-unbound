@@ -397,6 +397,10 @@ async function seedSiteSettings() {
 		},
 		journalDetailLabels: {
 			moreHeading: 'More from the journal'
+		},
+		branding: {
+			logoUrl: '',
+			faviconUrl: ''
 		}
 	};
 

@@ -4,6 +4,7 @@
 	import type { TrekCategory } from '$lib/data/treks';
 	import { revealStagger } from '$lib/utils/reveal';
 	import { content } from '$lib/cms/store.svelte';
+	import { resolveImageSrcset } from '$lib/cms/media';
 
 	const tabs: { key: TrekCategory; label: string; icon: typeof Flame }[] = [
 		{ key: 'signature', label: 'Signature Treks', icon: Flame },
@@ -97,13 +98,15 @@
 						>
 							<div class="relative aspect-[4/3] w-full overflow-hidden">
 								<picture>
-									<source
-										srcset={`${trek.image}-960.webp 960w, ${trek.image}-1920.webp 1920w`}
-										type="image/webp"
-										sizes="(min-width: 640px) 340px, 78vw"
-									/>
+									{#if resolveImageSrcset(trek.image).srcset}
+										<source
+											srcset={resolveImageSrcset(trek.image).srcset}
+											type="image/webp"
+											sizes="(min-width: 640px) 340px, 78vw"
+										/>
+									{/if}
 									<img
-										src={`${trek.image}-1920.webp`}
+										src={resolveImageSrcset(trek.image).src}
 										alt={trek.imageAlt}
 										class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
 										loading="lazy"

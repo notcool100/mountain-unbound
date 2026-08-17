@@ -3,6 +3,7 @@
 	import PageBanner from '$lib/components/PageBanner.svelte';
 	import { revealStagger } from '$lib/utils/reveal';
 	import { content } from '$lib/cms/store.svelte';
+	import { resolveImageSrcset } from '$lib/cms/media';
 
 	let articles = $derived(content.journal);
 
@@ -38,13 +39,15 @@
 				>
 					<div class="shadow-cozy shadow-cozy-hover relative aspect-[16/10] w-full overflow-hidden rounded-2xl">
 						<picture>
-							<source
-								srcset={`${article.image}-960.webp 960w, ${article.image}-1920.webp 1920w`}
-								type="image/webp"
-								sizes="(min-width: 768px) 50vw, 100vw"
-							/>
+							{#if resolveImageSrcset(article.image).srcset}
+								<source
+									srcset={resolveImageSrcset(article.image).srcset}
+									type="image/webp"
+									sizes="(min-width: 768px) 50vw, 100vw"
+								/>
+							{/if}
 							<img
-								src={`${article.image}-1920.webp`}
+								src={resolveImageSrcset(article.image).src}
 								alt={article.imageAlt}
 								class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
 								loading="lazy"

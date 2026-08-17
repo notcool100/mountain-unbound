@@ -10,7 +10,7 @@ import { notFound } from './middlewares/notFound.js';
 export function createApp() {
 	const app = express();
 
-	app.use(helmet());
+	app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 	app.use(
 		cors({
 			origin: env.corsOrigins,
@@ -23,6 +23,8 @@ export function createApp() {
 	app.get('/health', (_req, res) => {
 		res.json({ success: true, data: { status: 'ok', timestamp: new Date().toISOString() } });
 	});
+
+	app.use('/uploads', express.static(env.uploadsDir, { maxAge: '30d', immutable: true }));
 
 	app.use('/api/v1', apiRouter);
 

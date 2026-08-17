@@ -31,6 +31,11 @@ export const defaults: SiteContent = {
 		ctaText: 'Plan Your Trek'
 	},
 
+	branding: {
+		logoUrl: '',
+		faviconUrl: ''
+	},
+
 	footer: {
 		tagline:
 			'A Nepali-owned trekking and expedition agency guiding small groups through the Khumbu, Annapurna, and Manaslu regions since 2009.',

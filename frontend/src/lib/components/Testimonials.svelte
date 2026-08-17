@@ -3,6 +3,7 @@
 	import { ChevronLeft, ChevronRight, Quote, Star } from '@lucide/svelte';
 	import { reveal } from '$lib/utils/reveal';
 	import { content } from '$lib/cms/store.svelte';
+	import { resolveImageSrcset } from '$lib/cms/media';
 
 	let testimonials = $derived(content.testimonials);
 	let trackEl: HTMLDivElement = $state()!;
@@ -72,13 +73,11 @@
 			<div bind:this={slideEls[i]} class="relative h-full w-full shrink-0 snap-start snap-always">
 				<div class="kenburns absolute inset-0">
 					<picture>
-						<source
-							srcset={`${t.image}-960.webp 960w, ${t.image}-1920.webp 1920w`}
-							type="image/webp"
-							sizes="100vw"
-						/>
+						{#if resolveImageSrcset(t.image).srcset}
+							<source srcset={resolveImageSrcset(t.image).srcset} type="image/webp" sizes="100vw" />
+						{/if}
 						<img
-							src={`${t.image}-1920.webp`}
+							src={resolveImageSrcset(t.image).src}
 							alt={t.imageAlt}
 							class="h-full w-full object-cover"
 							loading="lazy"

@@ -24,6 +24,9 @@ COPY package.json package-lock.json ./
 COPY prisma ./prisma
 RUN npm ci --omit=dev && npx prisma generate
 COPY --from=build /app/dist ./dist
+# Uploaded media lands here at runtime. Mount a persistent volume at this
+# path in production or uploads are lost on every redeploy.
+RUN mkdir -p uploads/images uploads/videos
 
 EXPOSE 4000
 # Applies pending migrations, then starts the API. Safe to run on every

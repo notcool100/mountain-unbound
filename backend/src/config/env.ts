@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import path from 'node:path';
 import { z } from 'zod';
 
 const envSchema = z.object({
@@ -9,7 +10,10 @@ const envSchema = z.object({
 	JWT_EXPIRES_IN: z.string().default('7d'),
 	CORS_ORIGIN: z.string().default('http://localhost:5173'),
 	ADMIN_EMAIL: z.string().email().optional(),
-	ADMIN_PASSWORD: z.string().min(8).optional()
+	ADMIN_PASSWORD: z.string().min(8).optional(),
+	UPLOADS_DIR: z.string().default('uploads'),
+	MAX_IMAGE_UPLOAD_MB: z.coerce.number().positive().default(15),
+	MAX_VIDEO_UPLOAD_MB: z.coerce.number().positive().default(300)
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -22,5 +26,8 @@ if (!parsed.success) {
 export const env = {
 	...parsed.data,
 	isProduction: parsed.data.NODE_ENV === 'production',
-	corsOrigins: parsed.data.CORS_ORIGIN.split(',').map((origin) => origin.trim())
+	corsOrigins: parsed.data.CORS_ORIGIN.split(',').map((origin) => origin.trim()),
+	uploadsDir: path.resolve(process.cwd(), parsed.data.UPLOADS_DIR),
+	maxImageUploadBytes: parsed.data.MAX_IMAGE_UPLOAD_MB * 1024 * 1024,
+	maxVideoUploadBytes: parsed.data.MAX_VIDEO_UPLOAD_MB * 1024 * 1024
 };

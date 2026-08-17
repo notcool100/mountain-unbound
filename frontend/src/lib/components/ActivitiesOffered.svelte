@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { revealStagger, reveal } from '$lib/utils/reveal';
 	import { content } from '$lib/cms/store.svelte';
+	import { resolveImageSrcset } from '$lib/cms/media';
 
 	let activities = $derived(content.activities.activities);
 </script>
@@ -27,13 +28,15 @@
 					class="group shadow-cozy shadow-cozy-hover relative aspect-[3/4] overflow-hidden rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
 				>
 					<picture>
-						<source
-							srcset={`${activity.image}-960.webp 960w, ${activity.image}-1920.webp 1920w`}
-							type="image/webp"
-							sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-						/>
+						{#if resolveImageSrcset(activity.image).srcset}
+							<source
+								srcset={resolveImageSrcset(activity.image).srcset}
+								type="image/webp"
+								sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+							/>
+						{/if}
 						<img
-							src={`${activity.image}-1920.webp`}
+							src={resolveImageSrcset(activity.image).src}
 							alt={activity.imageAlt}
 							class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
 							loading="lazy"

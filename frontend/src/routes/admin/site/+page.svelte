@@ -18,6 +18,13 @@
 		<p class="mt-2 font-sans text-sm text-muted">Navigation, footer, and page chrome shared across the site.</p>
 	</div>
 
+	<ContentCard title="Branding" description="Logo shown in the nav and footer, and the browser-tab favicon." open>
+		<div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+			<ImagePickerField label="Brand logo" bind:value={content.branding.logoUrl} />
+			<ImagePickerField label="Favicon" bind:value={content.branding.faviconUrl} />
+		</div>
+	</ContentCard>
+
 	<ContentCard title="Navigation" open>
 		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 			<TextField label="Brand name" bind:value={content.nav.brand} />
