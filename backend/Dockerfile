@@ -2,10 +2,14 @@ FROM node:22-alpine AS base
 WORKDIR /app
 
 # --- deps: install once, cached across builds ---
+# --include=dev is explicit so this stage always installs devDependencies
+# (typescript, @types/*) even if NODE_ENV=production leaks in as a
+# build-time var from the platform (e.g. Coolify) — npm otherwise skips
+# devDependencies under NODE_ENV=production, which breaks `tsc` below.
 FROM base AS deps
 COPY package.json package-lock.json ./
 COPY prisma ./prisma
-RUN npm ci
+RUN npm ci --include=dev
 
 # --- build: compile TypeScript ---
 FROM deps AS build

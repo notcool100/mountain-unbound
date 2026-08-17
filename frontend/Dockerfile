@@ -2,9 +2,13 @@ FROM node:22-alpine AS base
 WORKDIR /app
 
 # --- deps: install once, cached across builds ---
+# --include=dev is explicit so this stage always installs devDependencies
+# (vite, @sveltejs/kit, typescript) even if NODE_ENV=production leaks in as
+# a build-time var from the platform (e.g. Coolify) — npm otherwise skips
+# devDependencies under NODE_ENV=production, which breaks `vite build` below.
 FROM base AS deps
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --include=dev
 
 # --- build: PUBLIC_* vars are inlined into the client bundle at build time,
 # so they must be passed as build args, not just runtime env vars. ---
