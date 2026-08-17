@@ -14,9 +14,7 @@ RUN npm ci --include=dev
 # so they must be passed as build args, not just runtime env vars. ---
 FROM deps AS build
 ARG PUBLIC_API_BASE_URL
-ARG PUBLIC_ADMIN_EMAIL
 ENV PUBLIC_API_BASE_URL=$PUBLIC_API_BASE_URL
-ENV PUBLIC_ADMIN_EMAIL=$PUBLIC_ADMIN_EMAIL
 COPY . .
 RUN npm run build
 

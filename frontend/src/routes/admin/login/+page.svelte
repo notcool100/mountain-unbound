@@ -3,6 +3,7 @@
 	import { MountainSnow } from '@lucide/svelte';
 	import { login } from '$lib/cms/auth';
 
+	let email = $state('');
 	let password = $state('');
 	let error = $state('');
 	let submitting = $state(false);
@@ -15,7 +16,7 @@
 		e.preventDefault();
 		submitting = true;
 		error = '';
-		const result = await login(password);
+		const result = await login(email, password);
 		submitting = false;
 		if (result.ok) {
 			goto('/admin');
@@ -35,16 +36,25 @@
 			<MountainSnow class="h-5 w-5 text-gold" strokeWidth={1.75} aria-hidden="true" />
 			Windhorse Admin
 		</div>
-		<p class="mt-2 font-sans text-sm text-muted">Sign in with the admin password to edit the site.</p>
+		<p class="mt-2 font-sans text-sm text-muted">Sign in with your admin email and password to edit the site.</p>
 
 		<form onsubmit={handleSubmit} class="mt-6 flex flex-col gap-4" novalidate>
+			<label class="flex flex-col gap-1.5">
+				<span class="font-sans text-sm font-medium text-ink">Email</span>
+				<input
+					type="email"
+					bind:value={email}
+					autocomplete="username"
+					use:focusOnMount
+					class="h-11 rounded-lg border border-ink/20 bg-snow px-3 font-sans text-sm text-ink focus-visible:border-gold"
+				/>
+			</label>
 			<label class="flex flex-col gap-1.5">
 				<span class="font-sans text-sm font-medium text-ink">Password</span>
 				<input
 					type="password"
 					bind:value={password}
 					autocomplete="current-password"
-					use:focusOnMount
 					class="h-11 rounded-lg border border-ink/20 bg-snow px-3 font-sans text-sm text-ink focus-visible:border-gold"
 				/>
 			</label>
