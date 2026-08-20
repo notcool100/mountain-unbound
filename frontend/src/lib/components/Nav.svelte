@@ -13,11 +13,10 @@
 	let links = $derived(content.nav.links);
 	let logoSrc = $derived(content.branding.logoUrl ? resolveImageSrcset(content.branding.logoUrl).src : '');
 
-	let isHome = $derived(page.url.pathname === '/');
-	// On the home page the nav starts transparent over the dark hero photo (light text),
-	// then becomes a solid light bar once scrolled (dark text). Every other page is
-	// solid light from the start.
-	let showSolid = $derived(!isHome || scrollState.pastThreshold);
+	// Every page opens with a dark hero/banner photo behind the fixed nav, so the nav
+	// starts transparent with light text, then becomes a solid light bar (dark text)
+	// once scrolled past it.
+	let showSolid = $derived(scrollState.pastThreshold);
 
 	function closeMenu() {
 		menuOpen = false;

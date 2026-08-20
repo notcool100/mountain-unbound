@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { reveal } from '$lib/utils/reveal';
 	import { resolveImageSrcset } from '$lib/cms/media';
+	import { scrollState } from '$lib/utils/scrollState.svelte';
 
 	type Props = {
 		image: string;
@@ -12,9 +14,26 @@
 
 	let { image, imageAlt, eyebrow, title, subtitle }: Props = $props();
 	let banner = $derived(resolveImageSrcset(image));
+
+	let sentinelEl: HTMLDivElement = $state()!;
+
+	// Mirrors Hero.svelte's sentinel: drives the nav's transparent -> frosted-glass
+	// transition on pages that open with this banner instead of the home hero.
+	onMount(() => {
+		const navObserver = new IntersectionObserver(
+			([entry]) => {
+				scrollState.pastThreshold = !entry.isIntersecting;
+			},
+			{ threshold: 0 }
+		);
+		navObserver.observe(sentinelEl);
+
+		return () => navObserver.disconnect();
+	});
 </script>
 
 <section class="relative flex h-[52vh] min-h-[380px] items-end overflow-hidden bg-scrim md:h-[58vh]">
+	<div bind:this={sentinelEl} class="pointer-events-none absolute inset-x-0 top-20 h-px"></div>
 	<picture>
 		{#if banner.srcset}
 			<source srcset={banner.srcset} type="image/webp" sizes="100vw" />
