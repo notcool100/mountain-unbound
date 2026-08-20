@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
+	import { beforeNavigate } from '$app/navigation';
 	import { ArrowDown } from '@lucide/svelte';
 	import { ensureGsap, gsap, ScrollTrigger } from '$lib/utils/gsap';
 	import { prefersReducedMotion } from '$lib/utils/motion.svelte';
@@ -22,6 +23,19 @@
 
 	let videoReady = $state(false);
 	let hasScrolledOnce = $state(false);
+
+	// GSAP's ScrollTrigger pin reparents sectionEl into an auto-created
+	// .pin-spacer wrapper, which SvelteKit's client-side router doesn't know
+	// about. If that reparenting is still in place when a navigation starts,
+	// the outgoing page's DOM can fail to unmount cleanly, leaving the old
+	// page's content stuck behind the new one. Revert the pin *before* the
+	// router starts swapping pages so sectionEl is back to being a plain
+	// child of <main> by the time Svelte tears it down.
+	let pinCtx: ReturnType<typeof gsap.context> | undefined;
+	beforeNavigate(() => {
+		pinCtx?.revert();
+		pinCtx = undefined;
+	});
 
 	let headlineLine1 = $derived(content.hero.headlineLine1);
 	let headlineLine2 = $derived(content.hero.headlineLine2);
@@ -86,9 +100,8 @@
 		);
 		navObserver.observe(sentinelEl);
 
-		let ctx: ReturnType<typeof gsap.context> | undefined;
 		if (!reduced) {
-			ctx = gsap.context(() => {
+			pinCtx = gsap.context(() => {
 				gsap
 					.timeline({
 						scrollTrigger: {
@@ -107,7 +120,8 @@
 
 		return () => {
 			navObserver.disconnect();
-			ctx?.revert();
+			pinCtx?.revert();
+			pinCtx = undefined;
 			if (onVisibility) document.removeEventListener('visibilitychange', onVisibility);
 		};
 	});
