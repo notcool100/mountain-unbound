@@ -19,12 +19,12 @@
 		const article: Article = {
 			slug,
 			title: 'New Article',
-			excerpt: '',
+			excerpt: 'Add a short excerpt for this article.',
 			category: 'Planning',
 			readMinutes: 5,
 			publishDate: new Date().toISOString().slice(0, 10),
 			image: '/images/ebc-ridge',
-			imageAlt: '',
+			imageAlt: 'New article',
 			sections: []
 		};
 		content.journal = [...content.journal, article];

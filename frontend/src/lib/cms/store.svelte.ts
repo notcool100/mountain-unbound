@@ -20,6 +20,21 @@ async function attemptSync<T>(fn: () => Promise<T>): Promise<T | undefined> {
 	}
 }
 
+/**
+ * Bullet-list fields (trek highlights/includes/excludes, journal section
+ * paragraphs) require every entry to be non-empty server-side, but the
+ * repeater's "Add" button always starts a new entry blank. Left as-is, one
+ * freshly-added-but-not-yet-typed-into bullet would 400 the *entire*
+ * containing trek/article and block every other field on it — including
+ * unrelated image/video changes — from reaching the server until that
+ * bullet is filled in. Stripping blanks from the outgoing payload (not from
+ * `content` itself, so the empty input the admin is about to type into
+ * still renders) avoids that.
+ */
+function withoutBlankStrings(items: string[]): string[] {
+	return items.filter((s) => s.trim().length > 0);
+}
+
 const SAVE_DEBOUNCE_MS = 600;
 
 export const content = $state<SiteContent>(structuredClone(defaults));
@@ -103,9 +118,12 @@ async function loadFromApi() {
  * reach the server.
  *
  * Returns the reconciled array (for `content`) alongside just the subset
- * that's confirmed persisted (for `lastSynced` — an item skipped by
+ * that's confirmed persisted (for `lastSynced`). A *create* skipped by
  * `attemptSync` because it's still incomplete stays out of this, so it's
- * retried on the next edit).
+ * retried as a create on the next edit. A *update* skipped the same way
+ * instead falls back to its last-known-good synced state, so the next
+ * sync still recognizes the row as existing and retries an update rather
+ * than mistakenly creating a duplicate.
  */
 async function syncIdCollection<T extends { id: string }>(
 	current: T[],
@@ -133,7 +151,11 @@ async function syncIdCollection<T extends { id: string }>(
 		} else if (!isEqual(prevEntry.item, item) || prevEntry.order !== order) {
 			const updated = await attemptSync(() => ops.update(id, payload));
 			result.push(updated ?? item);
-			if (updated) synced.push(updated);
+			// A failed update must still be tracked under its last-known-good server
+			// state (not dropped) — otherwise the next sync finds no `prevEntry` for
+			// this id and wrongly calls `create`, producing a duplicate row instead
+			// of retrying the update.
+			synced.push(updated ?? prevEntry.item);
 		} else {
 			result.push(item);
 			synced.push(item);
@@ -179,20 +201,35 @@ async function syncTreks() {
 		const itinerary = content.itineraries[trek.slug] ?? [];
 		const prev = previousBySlug.get(trek.slug);
 		const prevItinerary = lastSynced.itineraries[trek.slug] ?? [];
+		const bulletFields = {
+			highlights: withoutBlankStrings(trek.highlights),
+			includes: withoutBlankStrings(trek.includes),
+			excludes: withoutBlankStrings(trek.excludes)
+		};
 
 		if (!prev) {
-			const created = await attemptSync(() => treksApi.createTrek({ ...trek, itinerary }));
+			const created = await attemptSync(() =>
+				treksApi.createTrek({ ...trek, ...bulletFields, itinerary })
+			);
 			if (created) {
 				syncedTreks.push(trek);
 				syncedItineraries[trek.slug] = itinerary;
 			}
 		} else if (!isEqual(prev, trek)) {
 			const { slug, ...payload } = trek;
-			const updated = await attemptSync(() => treksApi.updateTrek(slug, { ...payload, itinerary }));
+			const updated = await attemptSync(() =>
+				treksApi.updateTrek(slug, { ...payload, ...bulletFields, itinerary })
+			);
 			if (updated) {
 				syncedTreks.push(trek);
 				syncedItineraries[trek.slug] = itinerary;
 			} else {
+				// Keep tracking this trek under its last-known-good server state rather
+				// than dropping it — otherwise the next sync finds no `prev` for this
+				// slug and wrongly calls createTrek, which 409s on the slug and leaves
+				// persist() stuck erroring forever (and this trek's edits, including
+				// any image/video change bundled with it, never reach the server).
+				syncedTreks.push(prev);
 				syncedItineraries[trek.slug] = prevItinerary;
 			}
 		} else if (!isEqual(prevItinerary, itinerary)) {
@@ -223,13 +260,18 @@ async function syncJournal() {
 
 	for (const article of current) {
 		const prev = previousBySlug.get(article.slug);
+		const sections = article.sections.map((s) => ({ ...s, body: withoutBlankStrings(s.body) }));
+
 		if (!prev) {
-			const created = await attemptSync(() => journalApi.createArticle(article));
+			const created = await attemptSync(() => journalApi.createArticle({ ...article, sections }));
 			if (created) syncedArticles.push(article);
 		} else if (!isEqual(prev, article)) {
 			const { slug, ...payload } = article;
-			const updated = await attemptSync(() => journalApi.updateArticle(slug, payload));
-			if (updated) syncedArticles.push(article);
+			const updated = await attemptSync(() => journalApi.updateArticle(slug, { ...payload, sections }));
+			// Same reasoning as syncTreks: a failed update must keep the article's
+			// last-known-good state tracked, or the next sync mistakes it for new
+			// and calls createArticle, which 409s on the slug forever.
+			syncedArticles.push(updated ?? prev);
 		} else {
 			syncedArticles.push(article);
 		}

@@ -122,7 +122,7 @@
 			<RepeaterField
 				label="Gallery"
 				bind:items={trek.gallery}
-				createItem={() => ({ image: '/images/ebc-card', alt: '' })}
+				createItem={() => ({ image: '/images/ebc-card', alt: 'Trek gallery photo' })}
 				itemLabel={(g, i) => `Photo ${i + 1}`}
 				addLabel="Add photo"
 			>
